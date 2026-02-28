@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync Vlogs - Ramzi Dhaoui</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0077B6;
+            --secondary-gold: #F4A261;
+            --bg-color: #F8F9FA;
+            --text-dark: #2B2D42;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .sync-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #E9ECEF;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #005f92;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .alert.success {
+            background: #D4EDDA;
+            color: #155724;
+            display: block;
+        }
+
+        .alert.error {
+            background: #F8D7DA;
+            color: #721C24;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sync-card">
+        <h1><i class="fab fa-tiktok"></i> Sync Vlogs</h1>
+        <p>Paste the links to your 3 newest TikTok videos to instantly update your portfolio website.</p>
+
+        <form id="sync-form">
+            <div class="input-group">
+                <label>Admin Password</label>
+                <input type="password" id="password" required placeholder="Enter sync password">
+            </div>
+
+            <div class="input-group">
+                <label>Video 1 URL (Newest)</label>
+                <input type="url" id="vid1" required placeholder="https://www.tiktok.com/@ramzi.dh/video/...">
+            </div>
+
+            <div class="input-group">
+                <label>Video 2 URL</label>
+                <input type="url" id="vid2" required placeholder="https://www.tiktok.com/@ramzi.dh/video/...">
+            </div>
+
+            <div class="input-group">
+                <label>Video 3 URL</label>
+                <input type="url" id="vid3" required placeholder="https://www.tiktok.com/@ramzi.dh/video/...">
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Update Website Now</button>
+        </form>
+
+        <div id="status-message" class="alert"></div>
+    </div>
+
+    <script>
+        document.getElementById('sync-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('submit-btn');
+            const msg = document.getElementById('status-message');
+
+            const password = document.getElementById('password').value;
+            const urls = [
+                document.getElementById('vid1').value,
+                document.getElementById('vid2').value,
+                document.getElementById('vid3').value
+            ];
+
+            // Extract IDs from URLs (matches 18+ digit sequences after /video/)
+            const videoIds = urls.map(url => {
+                const match = url.match(/\/video\/(\d+)/);
+                return match ? match[1] : null;
+            }).filter(id => id !== null);
+
+            if (videoIds.length === 0) {
+                msg.className = 'alert error';
+                msg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid TikTok URLs. Make sure they contain /video/ and numbers.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            msg.style.display = 'none';
+
+            try {
+                const response = await fetch('https://omipqlbwvksokgzhfjqy.supabase.co/functions/v1/update-tiktok-feed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, videoIds })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    msg.className = 'alert success';
+                    msg.innerHTML = '<i class="fas fa-check-circle"></i> Success! Your website is now updated.';
+                    document.getElementById('sync-form').reset();
+                } else {
+                    throw new Error(data.error || 'Failed to update');
+                }
+            } catch (err) {
+                msg.className = 'alert error';
+                msg.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${err.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Update Website Now';
+            }
+        });
+    </script>
+</body>
+
+</html>
