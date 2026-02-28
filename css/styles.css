@@ -174,10 +174,10 @@ ul {
 }
 
 .profile-pic-container-large {
-    width: 140px;
-    height: 140px;
+    width: 130px;
+    height: 170px;
     border-radius: 8px;
-    /* Square with slight rounding for premium feel */
+    /* Taller portrait shape */
     overflow: hidden;
     border: 3px solid white;
     box-shadow: var(--shadow-md);
@@ -195,8 +195,8 @@ ul {
 
 #navbar.scrolled .profile-pic-container-large {
     border-color: var(--primary-blue);
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 65px;
     border-width: 2px;
 }
 
@@ -208,6 +208,8 @@ ul {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: top center;
+    /* Prevents head from being cropped */
 }
 
 #navbar.scrolled .logo {
