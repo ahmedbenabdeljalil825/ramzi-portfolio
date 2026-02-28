@@ -1,0 +1,11 @@
+# Temp Python scripts (used during development only)
+*.py
+*.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.code-workspace
